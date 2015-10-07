@@ -25,7 +25,9 @@ private slots:
 
 private:
     MatrixModel *listModel;
+    std::unique_ptr<QSortFilterProxyModel> proxyModel;
     Ui::FindMatrixDialog *ui;
+    void keyPressEvent(QKeyEvent *event);
 };
 
 #endif // FINDMATRIXDIALOG_HPP

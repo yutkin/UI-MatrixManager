@@ -1,3 +1,4 @@
+#include <QDebug>
 #include "AddMatrixDialog.hpp"
 #include "ui_AddMatrixDialog.h"
 
@@ -29,6 +30,9 @@ AddMatrixDialog::~AddMatrixDialog() {
 void AddMatrixDialog::okBtnClicked() {
     auto rows = ui->rowsEdit->text().toUInt();
     auto columns = ui->columnsEdit->text().toUInt();
+    if (ui->matrixTable->rowCount() != rows || ui->matrixTable->columnCount() != columns) {
+        fillTable(rows, columns);
+    }
     auto newMatrix = ui->extendedCheckBox->isChecked() ?
         std::shared_ptr<MatrixExtended<int>>(new MatrixExtended<int>(rows, columns, 0)) :
             std::shared_ptr<Matrix<int>>(new Matrix<int>(rows, columns, 0));
