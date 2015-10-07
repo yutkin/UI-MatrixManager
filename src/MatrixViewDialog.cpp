@@ -3,25 +3,25 @@
 #include "MatrixViewDialog.hpp"
 #include "ui_MatrixViewDialog.h"
 
-MatrixViewDialog::MatrixViewDialog(Matrix<int>& matrix, int pos, QWidget *parent) :
+MatrixViewDialog::MatrixViewDialog(std::shared_ptr<Matrix<int>>& matrix, int pos, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::MatrixViewDialog),
     data(matrix),
     _pos(pos)
 {
     ui->setupUi(this);
-    setWindowTitle(QString::fromStdString(matrix.toStr()) + " info");
+    setWindowTitle(QString::fromStdString(matrix->toStr()) + " info");
 
-    ui->tableWidget->setRowCount(matrix.numRows());
-    ui->tableWidget->setColumnCount(matrix.numCols());
+    ui->tableWidget->setRowCount(matrix->rows());
+    ui->tableWidget->setColumnCount(matrix->columns());
     ui->tableWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->tableWidget->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
-    for (size_t i = 0; i < matrix.numRows(); ++i) {
-        for (size_t j = 0; j < matrix.numCols(); ++j) {
+    for (size_t i = 0; i < matrix->rows(); ++i) {
+        for (size_t j = 0; j < matrix->columns(); ++j) {
             auto tmpItem = new QTableWidgetItem;
 
-            auto tmpStr = QString::fromStdString(std::to_string(matrix(i,j)));
+            auto tmpStr = QString::fromStdString(std::to_string((*matrix)(i,j)));
             tmpItem->setText(tmpStr);
             tmpItem->setTextAlignment(Qt::AlignCenter);
             ui->tableWidget->setItem(i, j, tmpItem);
@@ -37,12 +37,11 @@ MatrixViewDialog::~MatrixViewDialog() {
 }
 
 void MatrixViewDialog::saveBtnClicked() {
-    for (size_t i = 0; i < data.numRows(); ++i) {
-        for (size_t j = 0; j < data.numCols(); ++j) {
-            data(i,j) = ui->tableWidget->item(i,j)->text().toInt();
+    for (size_t i = 0; i < data->rows(); ++i) {
+        for (size_t j = 0; j < data->columns(); ++j) {
+            (*data)(i,j) = ui->tableWidget->item(i,j)->text().toInt();
         }
     }
-    emit matrixChanged(data, _pos);
     close();
 }
 

@@ -11,20 +11,19 @@ template <typename T>
 class Matrix {
 public:
     Matrix() = default;
-    Matrix(size_t n, size_t m,  T initial_val = T());
-    Matrix(const Matrix& rMatrix);
-    Matrix(Matrix&& rMatrix);
+    Matrix(size_t, size_t,  T initial_val = T());
+    Matrix(const Matrix&);
+    Matrix(Matrix&&);
     ~Matrix();
 
-    Matrix& setNewDims(const size_t newRows, const size_t newCols);
-    size_t numRows() const;
-    size_t numCols() const;
+    size_t rows() const;
+    size_t columns() const;
     size_t size() const;
     T max() const;
     T min() const;
     bool isSquare() const;
     bool isZeroMatrix() const;
-    std::string toStr() const;
+    virtual std::string toStr() const;
 
     typedef T* iterator;
     typedef const T* const_iterator;
@@ -33,48 +32,46 @@ public:
     const_iterator cbegin() const;
     const_iterator cend() const;
 
-    T&       operator()(const size_t i, const size_t j);
-    const T& operator()(const size_t i, const size_t j) const;
-    bool     operator==(const Matrix<T>& m);
-    Matrix&  operator=(const Matrix& rMatrix);
-    Matrix&  operator=(Matrix&& rMatrix);
-    Matrix   operator*(const Matrix<T>& m);
-    Matrix   operator+(const Matrix<T>& m);
+    T&       operator()(const size_t, const size_t);
+    const T& operator()(const size_t, const size_t) const;
+    Matrix&  operator=(const Matrix&);
+    Matrix&  operator=(Matrix&&);
+    Matrix   operator*(const Matrix<T>&);
+    Matrix   operator+(const Matrix<T>&);
+    bool     operator==(const Matrix<T>&);
 
     Matrix& sort(const std::function<bool(T, T)> f = std::less<T>());
 
     template <typename U>
-    friend std::ostream& operator<<(std::ostream& os, const Matrix<U>& m);
+    friend std::ostream& operator<<(std::ostream&, const Matrix<U>&);
 
     template <typename U>
-    friend std::istream& operator>>(std::istream& is, Matrix<U>& m);
+    friend std::istream& operator>>(std::istream&, Matrix<U>&);
 
-private:
-    size_t rows = 0;
-    size_t cols = 0;
+protected:
+    size_t _rows = 0;
+    size_t _columns = 0;
     T* data = nullptr;
     T* data_end = nullptr;
 };
 
 template <typename T>
-Matrix<T>::Matrix(size_t n, size_t m, T initial_val) : rows(n), cols(m) {
-    if (rows >= 0 && cols >= 0) {
-        size_t sz = rows*cols;
-        data = new T[sz]();
-        data_end = data + sz;
-        for (size_t i = 0; i < sz; ++i) {
-            data[i] = initial_val;
-        }
-    } else {
-        throw std::domain_error("matrix dimensions should be positive integers");
+Matrix<T>::Matrix(size_t n, size_t m, T initial_val) {
+    _rows = n;
+    _columns = m;
+    size_t sz = _rows * _columns;
+    data = new T[sz]();
+    data_end = data + sz;
+    for (size_t i = 0; i < sz; ++i) {
+        data[i] = initial_val;
     }
 }
 
 template <typename T>
 Matrix<T>::Matrix(const Matrix& rMatrix) {
-    size_t sz = rMatrix.rows * rMatrix.cols;
-    rows = rMatrix.rows;
-    cols = rMatrix.cols;
+    size_t sz = rMatrix._rows * rMatrix._columns;
+    _rows = rMatrix._rows;
+    _columns = rMatrix._columns;
     data = new T[sz]();
     data_end = data + sz;
     std::copy(rMatrix.data, rMatrix.data_end, data);
@@ -82,8 +79,8 @@ Matrix<T>::Matrix(const Matrix& rMatrix) {
 
 template <typename T>
 Matrix<T>::Matrix(Matrix&& rMatrix) {
-    rows = rMatrix.rows;
-    cols = rMatrix.cols;
+    _rows = rMatrix._rows;
+    _columns = rMatrix._columns;
     data = rMatrix.data;
     data_end = rMatrix.data_end;
     rMatrix.data = nullptr;
@@ -96,31 +93,18 @@ inline Matrix<T>::~Matrix() {
 }
 
 template <typename T>
-Matrix<T>& Matrix<T>::setNewDims(const size_t newRows, const size_t newCols) {
-    size_t newsz = newRows * newCols;
-    T *tmp_data = new T[newsz]();
-
-    delete[] data;
-    data = tmp_data;
-    data_end = data + newsz;
-    rows = newRows;
-    cols = newCols;
-    return *this;
+inline size_t Matrix<T>::rows() const {
+    return _rows;
 }
 
 template <typename T>
-inline size_t Matrix<T>::numRows() const {
-    return rows;
-}
-
-template <typename T>
-inline size_t Matrix<T>::numCols() const {
-    return cols;
+inline size_t Matrix<T>::columns() const {
+    return _columns;
 }
 
 template <typename T>
 inline size_t Matrix<T>::size() const {
-    return rows * cols;
+    return _rows * _columns;
 }
 
 template <typename T>
@@ -135,7 +119,7 @@ inline T Matrix<T>::min() const {
 
 template <typename T>
 inline bool Matrix<T>::isSquare() const {
-    return rows == cols;
+    return _rows == _columns;
 }
 
 template <typename T>
@@ -151,7 +135,7 @@ bool Matrix<T>::isZeroMatrix() const {
 template <typename T>
 std::string Matrix<T>::toStr() const {
     using std::to_string;
-    return "Matrix " + to_string(rows) + "x" + to_string(cols);
+    return "Matrix " + to_string(_rows) + "x" + to_string(_columns);
 }
 
 template <typename T>
@@ -176,8 +160,8 @@ inline typename Matrix<T>::const_iterator Matrix<T>::cend() const {
 
 template <typename T>
 T& Matrix<T>::operator()(const size_t i, const size_t j) {
-    if (i < rows && i >= 0 && j < cols && j >= 0) {
-        return data[i*cols + j];
+    if (i < _rows && i >= 0 && j < _columns && j >= 0) {
+        return data[i* _columns + j];
     } else {
         throw std::out_of_range("matrix indices out of range");
     }
@@ -185,8 +169,8 @@ T& Matrix<T>::operator()(const size_t i, const size_t j) {
 
 template <typename T>
 const T& Matrix<T>::operator()(const size_t i, const size_t j) const {
-    if (i < rows && i >= 0 && j < cols && j >= 0) {
-        return data[i*cols + j];
+    if (i < _rows && i >= 0 && j < _columns && j >= 0) {
+        return data[i* _columns + j];
     } else {
         throw std::out_of_range("matrix indices out of range");
     }
@@ -198,9 +182,9 @@ Matrix<T>& Matrix<T>::operator=(const Matrix& rMatrix) {
         return *this;
     }
     delete[] data;
-    size_t sz = rMatrix.rows * rMatrix.cols;
-    rows = rMatrix.rows;
-    cols = rMatrix.cols;
+    size_t sz = rMatrix._rows * rMatrix._columns;
+    _rows = rMatrix._rows;
+    _columns = rMatrix._columns;
     data = new T[sz]();
     data_end = data + sz;
     std::copy(rMatrix.data, rMatrix.data_end, data);
@@ -213,8 +197,8 @@ Matrix<T>& Matrix<T>::operator=(Matrix&& rMatrix) {
         return *this;
     }
     delete[] data;
-    rows = rMatrix.rows;
-    cols = rMatrix.cols;
+    _rows = rMatrix._rows;
+    _columns = rMatrix._columns;
     data = rMatrix.data;
     data_end = rMatrix.data_end;
     rMatrix.data = nullptr;
@@ -223,15 +207,15 @@ Matrix<T>& Matrix<T>::operator=(Matrix&& rMatrix) {
 }
 
 template <typename T>
-Matrix<T> Matrix<T>::operator*(const Matrix<T> &m) {
-    if (cols != m.rows) {
+Matrix<T> Matrix<T>::operator*(const Matrix<T> &rMatrix) {
+    if (_columns != rMatrix._rows) {
         throw std::domain_error("Multiplication is possible for N x M and M x Q matrixes");
     }
-    Matrix<T> new_m {rows, m.cols};
-    for (size_t i = 0; i < rows; ++i) {
-        for (size_t k = 0; k < m.rows; ++k) {
-            for (size_t j = 0; j < m.cols; ++j) {
-                new_m(i, j) += (*this)(i, k) * m(k, j);
+    Matrix<T> new_m {_rows, rMatrix._columns};
+    for (size_t i = 0; i < _rows; ++i) {
+        for (size_t k = 0; k < rMatrix._rows; ++k) {
+            for (size_t j = 0; j < rMatrix._columns; ++j) {
+                new_m(i, j) += (*this)(i, k) * rMatrix(k, j);
             }
         }
     }
@@ -239,22 +223,23 @@ Matrix<T> Matrix<T>::operator*(const Matrix<T> &m) {
 }
 
 template <typename T>
-Matrix<T> Matrix<T>::operator+(const Matrix<T> &m) {
-    if (cols != m.cols || rows != m.rows) {
+Matrix<T> Matrix<T>::operator+(const Matrix<T> &rMatrix) {
+    if (_columns != rMatrix._columns || _rows != rMatrix._rows) {
         throw std::domain_error("Addition is possible for N x M and N x M matrixes");
     }
-    Matrix<T> new_m {rows, cols};
-    for (size_t i = 0; i < rows; ++i) {
-        for (size_t j = 0; j < cols; ++j) {
-            new_m(i, j) = (*this)(i, j) + m(i, j);
+    Matrix<T> new_m {_rows, _columns};
+    for (size_t i = 0; i < _rows; ++i) {
+        for (size_t j = 0; j < _columns; ++j) {
+            new_m(i, j) = (*this)(i, j) + rMatrix(i, j);
         }
     }
     return new_m;
 }
 
 template <typename T>
-inline bool Matrix<T>::operator==(const Matrix<T> &m) {
-    return std::equal(data, data_end, m.data);
+inline bool Matrix<T>::operator==(const Matrix<T> &rMatrix) {
+    return _rows == rMatrix._rows && _columns == rMatrix._columns &&
+            std::equal(data, data_end, rMatrix.data);
 }
 
 template <typename T>
@@ -264,21 +249,21 @@ Matrix<T>& Matrix<T>::sort(const std::function<bool(T, T)> f) {
 }
 
 template <typename U>
-std::ostream& operator<<(std::ostream& os, const Matrix<U>& m) {
-    for (size_t i = 0; i < m.numRows(); ++i) {
+std::ostream& operator<<(std::ostream& os, const Matrix<U>& rMatrix) {
+    for (size_t i = 0; i < rMatrix.rows(); ++i) {
         os << "\n";
-        for (size_t j = 0; j < m.numCols(); ++j) {
-            os << std::left << std::setw(4) << m(i, j) << " ";
+        for (size_t j = 0; j < rMatrix.columns(); ++j) {
+            os << std::left << std::setw(4) << rMatrix(i, j) << " ";
         }
     }
     return os;
 }
 
 template <typename U>
-std::istream& operator>>(std::istream& is, Matrix<U>& m) {
-    for (size_t i = 0; i < m.numRows(); ++i) {
-        for (size_t j = 0; j < m.numCols(); ++j) {
-            is >> m(i, j);
+std::istream& operator>>(std::istream& is, Matrix<U>& rMatrix) {
+    for (size_t i = 0; i < rMatrix.rows(); ++i) {
+        for (size_t j = 0; j < rMatrix.columns(); ++j) {
+            is >> rMatrix(i, j);
         }
     }
     return is;

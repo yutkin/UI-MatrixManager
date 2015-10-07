@@ -2,7 +2,7 @@
 #define MATRIXVIEWDIALOG_HPP
 
 #include <QDialog>
-#include "MatrixClass.hpp"
+#include "Matrix.hpp"
 
 namespace Ui {
 class MatrixViewDialog;
@@ -13,11 +13,10 @@ class MatrixViewDialog : public QDialog
     Q_OBJECT
 
 public:
-    MatrixViewDialog(Matrix<int>&, int, QWidget *parent = nullptr);
+    MatrixViewDialog(std::shared_ptr<Matrix<int>>&, int, QWidget *parent = nullptr);
     ~MatrixViewDialog();
 
 signals:
-    void matrixChanged(Matrix<int>&, int);
     void matrixRemoved(int);
 
 private slots:
@@ -26,7 +25,7 @@ private slots:
 
 private:
     Ui::MatrixViewDialog *ui;
-    Matrix<int> data;
+    std::shared_ptr<Matrix<int>> data;
     int _pos;
 };
 

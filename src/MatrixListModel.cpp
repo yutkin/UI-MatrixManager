@@ -11,11 +11,11 @@ QVariant MatrixModel::data(const QModelIndex &index, int role) const {
         return QVariant();
 
     if (role == Qt::DisplayRole)
-        return QString::fromStdString(matrixes[index.row()].toStr());
+        return QString::fromStdString(matrixes[index.row()]->toStr());
     else
         return QVariant();
 }
 
-std::deque<Matrix<int>>& MatrixModel::getData() {
+deque<std::shared_ptr<Matrix<int>>>& MatrixModel::getData() {
     return matrixes;
 }

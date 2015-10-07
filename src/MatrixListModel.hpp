@@ -3,7 +3,10 @@
 
 #include <QAbstractListModel>
 #include <deque>
-#include "MatrixClass.hpp"
+#include "Matrix.hpp"
+#include "MatrixExtended.hpp"
+
+using std::deque;
 
 class MatrixModel : public QAbstractListModel {
 public:
@@ -13,10 +16,10 @@ public:
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
 
-    std::deque<Matrix<int>>& getData();
+    deque<std::shared_ptr<Matrix<int>>>& getData();
 
 private:
-    std::deque<Matrix<int>> matrixes;
+    deque<std::shared_ptr<Matrix<int>>> matrixes;
 };
 
 Q_DECLARE_METATYPE(Matrix<int>);

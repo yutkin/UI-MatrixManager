@@ -22,8 +22,7 @@ private slots:
     void findBtnClicked();
     void matrixItemDblClicked(QModelIndex);
 
-    void addMatrix(Position, Matrix<int>&);
-    void changeMatrix(Matrix<int>&, int);
+    void addMatrix(Position, std::shared_ptr<Matrix<int>>&);
     void removeMatrix(int);
 
 private:

@@ -19,7 +19,8 @@ SOURCES  += src/main.cpp \
             src/MatrixListModel.cpp \
             src/FindMatrixDialog.cpp
 
-HEADERS  += src/MatrixClass.hpp \
+HEADERS  += src/Matrix.hpp \
+            src/MatrixExtended.hpp \
             src/MatrixViewDialog.hpp \
             src/AddMatrixDialog.hpp \
             src/FrontView.hpp \

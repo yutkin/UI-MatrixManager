@@ -2,7 +2,6 @@
 #include <QDebug>
 
 #include "FrontView.hpp"
-#include "PositionEnum.hpp"
 #include "AddMatrixDialog.hpp"
 #include "MatrixViewDialog.hpp"
 #include "FindMatrixDialog.hpp"
@@ -34,8 +33,8 @@ FrontView::~FrontView() {
 void FrontView::addButtonClicked() {
     auto addMatrixDialog = new AddMatrixDialog(this, Position::Bottom);
 
-    connect(addMatrixDialog, SIGNAL(addedNewMatrix(Position, Matrix<int>&)),
-            SLOT(addMatrix(Position, Matrix<int>&)));
+    connect(addMatrixDialog, SIGNAL(addedNewMatrix(Position, std::shared_ptr<Matrix<int>>&)),
+            SLOT(addMatrix(Position, std::shared_ptr<Matrix<int>>&)));
 
     addMatrixDialog->setModal(true);
     addMatrixDialog->show();
@@ -44,14 +43,14 @@ void FrontView::addButtonClicked() {
 void FrontView::addToTopButtonClicked() {
     auto addMatrixDialog = new AddMatrixDialog(this, Position::Top);
 
-    connect(addMatrixDialog, SIGNAL(addedNewMatrix(Position, Matrix<int>&)),
-             SLOT(addMatrix(Position, Matrix<int>&)));
+    connect(addMatrixDialog, SIGNAL(addedNewMatrix(Position, std::shared_ptr<Matrix<int>>&)),
+             SLOT(addMatrix(Position, std::shared_ptr<Matrix<int>>&)));
 
     addMatrixDialog->setModal(true);
     addMatrixDialog->show();
 }
 
-void FrontView::addMatrix(Position pos, Matrix<int>& matrix) {
+void FrontView::addMatrix(Position pos, std::shared_ptr<Matrix<int>>& matrix) {
     if (pos == Position::Bottom)
         listModel->getData().push_back(matrix);
     else if (pos == Position::Top)
@@ -70,21 +69,24 @@ void FrontView::matrixItemDblClicked(QModelIndex index) {
     auto matrixViewDialog = new MatrixViewDialog(selectedMatrix, pos, this);
 
     connect(matrixViewDialog, SIGNAL(matrixRemoved(int)), SLOT(removeMatrix(int)));
-    connect(matrixViewDialog, SIGNAL(matrixChanged(Matrix<int>&, int)),
-            SLOT(changeMatrix(Matrix<int>&, int)));
 
     matrixViewDialog->setModal(true);
     matrixViewDialog->show();
 }
 
-void FrontView::changeMatrix(Matrix<int>& m, int pos) {
-    listModel->getData()[pos] = m;
+void FrontView::findBtnClicked() {
+    if (listModel->rowCount() == 0) {
+        auto text = QString("There are no matrixes. Add someone.");
+        QMessageBox::information(this, "", text);
+        return;
+    }
 
-    updateTotalLabel();
+    auto findMatrixDialog = new FindMatrixDialog(listModel, this);
 
-    auto indexBegin = listModel->index(0, 0);
-    auto indexEnd = listModel->index(listModel->rowCount()-1, 0);
-    emit listModel->dataChanged(indexBegin, indexEnd);
+    connect(findMatrixDialog, SIGNAL(matrixRemoved(int)), SLOT(removeMatrix(int)));
+
+    findMatrixDialog->setModal(true);
+    findMatrixDialog->show();
 }
 
 void FrontView::updateTotalLabel() {
@@ -98,25 +100,8 @@ void FrontView::removeMatrix(int pos) {
 
     updateTotalLabel();
 
-    auto indexBegin = listModel->index(0, 0);
-    auto indexEnd = listModel->index(listModel->rowCount()-1, 0);
+    auto indexBegin = listModel->index(pos-1, 0);
+    auto indexEnd = listModel->index(pos, 0);
     emit listModel->dataChanged(indexBegin, indexEnd);
-}
-
-void FrontView::findBtnClicked() {
-    if (listModel->rowCount() == 0) {
-        auto text = QString("There are no matrixes. Add someone.");
-        QMessageBox::information(this, "", text);
-        return;
-    }
-
-    auto findMatrixDialog = new FindMatrixDialog(listModel, this);
-
-    connect(findMatrixDialog, SIGNAL(matrixRemoved(int)), SLOT(removeMatrix(int)));
-    connect(findMatrixDialog, SIGNAL(matrixChanged(Matrix<int>&, int)),
-            SLOT(changeMatrix(Matrix<int>&,int)));
-
-    findMatrixDialog->setModal(true);
-    findMatrixDialog->show();
 }
 

@@ -41,9 +41,7 @@ void FindMatrixDialog::findBtnClicked() {
     if (proxyModel->rowCount() == 0) {
         auto text = QString("There are no %1x%2 matrixes!").arg(rows).arg(columns);
         QMessageBox::information(this, "", text);
-    } /*else {
-        setWindowTitle(QString("%1 matrixes found").arg(proxyModel->rowCount()));
-    }*/
+    }
 }
 
 void FindMatrixDialog::matrixItemDblClicked(QModelIndex index) {
@@ -52,8 +50,6 @@ void FindMatrixDialog::matrixItemDblClicked(QModelIndex index) {
     auto matrixViewDialog = new MatrixViewDialog(selectedMatrix, pos, this);
 
     connect(matrixViewDialog, SIGNAL(matrixRemoved(int)), SIGNAL(matrixRemoved(int)));
-    connect(matrixViewDialog, SIGNAL(matrixChanged(Matrix<int>&, int)),
-            SIGNAL(matrixChanged(Matrix<int>&, int)));
 
     matrixViewDialog->setModal(true);
     matrixViewDialog->show();

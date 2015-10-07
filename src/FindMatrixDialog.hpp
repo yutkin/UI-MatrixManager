@@ -18,7 +18,6 @@ public:
 
 signals:
     void matrixRemoved(int);
-    void matrixChanged(Matrix<int>&, int);
 
 private slots:
     void findBtnClicked();

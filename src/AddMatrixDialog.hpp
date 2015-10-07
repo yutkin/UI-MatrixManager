@@ -3,7 +3,7 @@
 
 #include <QDialog>
 #include "PositionEnum.hpp"
-#include "MatrixClass.hpp"
+#include "Matrix.hpp"
 
 namespace Ui {
     class AddMatrixDialog;
@@ -16,7 +16,7 @@ public:
     AddMatrixDialog(QWidget *, Position);
     ~AddMatrixDialog();
 signals:
-    void addedNewMatrix(Position, Matrix<int>&);
+    void addedNewMatrix(Position, std::shared_ptr<Matrix<int>>&);
 
 private slots:
     void okBtnClicked();
