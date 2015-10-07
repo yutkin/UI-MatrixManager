@@ -23,7 +23,6 @@ FrontView::FrontView(QWidget *parent) :
 
     connect(ui->listView, SIGNAL(doubleClicked(QModelIndex)),
             SLOT(matrixItemDblClicked(QModelIndex)));
-
 }
 
 FrontView::~FrontView() {

@@ -29,7 +29,9 @@ AddMatrixDialog::~AddMatrixDialog() {
 void AddMatrixDialog::okBtnClicked() {
     auto rows = ui->rowsEdit->text().toUInt();
     auto columns = ui->columnsEdit->text().toUInt();
-    std::shared_ptr<Matrix<int>> newMatrix(new Matrix<int>(rows, columns, 0));
+    auto newMatrix = ui->extendedCheckBox->isChecked() ?
+        std::shared_ptr<MatrixExtended<int>>(new MatrixExtended<int>(rows, columns, 0)) :
+            std::shared_ptr<Matrix<int>>(new Matrix<int>(rows, columns, 0));
 
     for (size_t i = 0; i < rows; ++i) {
         for (size_t j = 0; j < columns; ++j) {

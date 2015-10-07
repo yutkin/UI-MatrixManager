@@ -4,6 +4,7 @@
 #include <QDialog>
 #include "PositionEnum.hpp"
 #include "Matrix.hpp"
+#include "MatrixExtended.hpp"
 
 namespace Ui {
     class AddMatrixDialog;

@@ -32,7 +32,7 @@ FindMatrixDialog::~FindMatrixDialog() {
 void FindMatrixDialog::findBtnClicked() {
     auto rows = ui->rowsEdit->text();
     auto columns = ui->columnsEdit->text();
-    auto searchPattern = QString("Matrix %1x%2").arg(rows).arg(columns);
+    auto searchPattern = QString("%1x%2").arg(rows).arg(columns);
 
     auto proxyModel = new QSortFilterProxyModel(this);
     proxyModel->setSourceModel(listModel);
