@@ -58,8 +58,9 @@ void FrontView::addMatrix(Position pos, std::shared_ptr<Matrix<int>>& matrix) {
 
     updateTotalLabel();
 
-    auto indexBegin = listModel->index(0, 0);
-    auto indexEnd = listModel->index(listModel->rowCount()-1, 0);
+    auto i = (pos == Position::Top) ? 0 : listModel->rowCount() - 1;
+    auto indexBegin = listModel->index(i, 0);
+    auto indexEnd = listModel->index(i, 0);
     emit listModel->dataChanged(indexBegin, indexEnd);
 }
 
@@ -100,24 +101,27 @@ void FrontView::removeMatrix(int pos) {
 
     updateTotalLabel();
 
-    auto indexBegin = listModel->index(pos-1, 0);
+    auto indexBegin = listModel->index(pos, 0);
     auto indexEnd = listModel->index(pos, 0);
     emit listModel->dataChanged(indexBegin, indexEnd);
 }
 
 void FrontView::keyPressEvent(QKeyEvent *event) {
-    auto selectedItems = ui->listView->selectionModel()->selectedIndexes();
-    auto len = selectedItems.length();
-    QString request = (len == 1) ? "Do you really want to remove this matrix?" :
-        (len > 1)  ? QString("Do you really want to remove %1 matrixes?").arg(len) : "";
+    auto selectedIndexes = ui->listView->selectionModel()->selectedIndexes();
+    auto len = selectedIndexes.length();
+
 
     if (event->key() == Qt::Key_Backspace && len > 0) {
+        QString request = (len == 1) ? "Do you really want to remove this matrix?" :
+            (len > 1)  ? QString("Do you really want to remove %1 matrixes?").arg(len) : "";
+
         auto reply = QMessageBox::question(this, "", request);
+
         if (reply == QMessageBox::Yes) {
-            for (auto i = 0; i < len; ++i) {
-                removeMatrix(i);
-                updateTotalLabel();
+            foreach(const QModelIndex &index, selectedIndexes){
+                removeMatrix(index.row());
             }
+            ui->listView->selectionModel()->clear();
         }
     }
 }
