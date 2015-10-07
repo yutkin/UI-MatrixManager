@@ -38,6 +38,8 @@ void FindMatrixDialog::findBtnClicked() {
     proxyModel->setSourceModel(listModel);
     proxyModel->setFilterRegExp(searchPattern);
     ui->listView->setModel(proxyModel);
+    ui->listView->setSelectionMode(QAbstractItemView::ExtendedSelection);
+
     if (proxyModel->rowCount() == 0) {
         auto text = QString("There are no %1x%2 matrixes!").arg(rows).arg(columns);
         QMessageBox::information(this, "", text);

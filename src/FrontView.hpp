@@ -29,6 +29,7 @@ private:
     MatrixModel *listModel;
     Ui::Widget *ui;
 
+    void keyPressEvent(QKeyEvent *event);
     void updateTotalLabel();
 };
 

@@ -16,6 +16,7 @@ FrontView::FrontView(QWidget *parent) :
 
     listModel = new MatrixModel(this);
     ui->listView->setModel(listModel);
+    ui->listView->setSelectionMode(QAbstractItemView::ExtendedSelection);
 
     connect(ui->addBtn,      SIGNAL(clicked()), SLOT(addButtonClicked()));
     connect(ui->addToTopBtn, SIGNAL(clicked()), SLOT(addToTopButtonClicked()));
@@ -104,3 +105,19 @@ void FrontView::removeMatrix(int pos) {
     emit listModel->dataChanged(indexBegin, indexEnd);
 }
 
+void FrontView::keyPressEvent(QKeyEvent *event) {
+    auto selectedItems = ui->listView->selectionModel()->selectedIndexes();
+    auto len = selectedItems.length();
+    QString request = (len == 1) ? "Do you really want to remove this matrix?" :
+        (len > 1)  ? QString("Do you really want to remove %1 matrixes?").arg(len) : "";
+
+    if (event->key() == Qt::Key_Backspace && len > 0) {
+        auto reply = QMessageBox::question(this, "", request);
+        if (reply == QMessageBox::Yes) {
+            for (auto i = 0; i < len; ++i) {
+                removeMatrix(i);
+                updateTotalLabel();
+            }
+        }
+    }
+}
