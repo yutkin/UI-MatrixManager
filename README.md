@@ -1,4 +1,4 @@
-#Screenshots of UI:
+#Screenshots:
 
 ![Screenshot 1](http://s9.postimg.org/83xo8czj3/Screen_Shot_2015_10_07_at_1_13_56_PM.png "Screenshot 1")
 ![Screenshot 2](http://s9.postimg.org/pihwgmwnz/Screen_Shot_2015_10_07_at_1_14_41_PM.png "Screenshot 2")
