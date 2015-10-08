@@ -1,4 +1,8 @@
+#include <sstream>
+
 #include <QtWidgets>
+#include <QFile>
+#include <QTextStream>
 #include <QDebug>
 
 #include "FrontView.hpp"
@@ -18,12 +22,31 @@ FrontView::FrontView(QWidget *parent) :
     ui->listView->setModel(listModel);
     ui->listView->setSelectionMode(QAbstractItemView::ExtendedSelection);
 
+    QMenu *fileMenu = new QMenu("File", this);
+
+    auto importFromFileAction = new QAction("Import From...", this);
+    importFromFileAction->setShortcut(tr("Ctrl+O"));
+    fileMenu->addAction(importFromFileAction);
+
+    auto saveToFileAction = new QAction("Save As...", this);
+    saveToFileAction->setShortcut(tr("Ctrl+S"));
+
+    fileMenu->addAction(importFromFileAction);
+    fileMenu->addAction(saveToFileAction);
+
+    QMenuBar *menuBar = new QMenuBar(this);
+    menuBar->addMenu(fileMenu);
+    menuBar->show();
+
     connect(ui->addBtn,      SIGNAL(clicked()), SLOT(addButtonClicked()));
     connect(ui->addToTopBtn, SIGNAL(clicked()), SLOT(addToTopButtonClicked()));
     connect(ui->findBtn,     SIGNAL(clicked()), SLOT(findBtnClicked()));
 
     connect(ui->listView, SIGNAL(doubleClicked(QModelIndex)),
             SLOT(matrixItemDblClicked(QModelIndex)));
+
+    connect(saveToFileAction,   SIGNAL(triggered()), SLOT(saveToFile()));
+    connect(importFromFileAction, SIGNAL(triggered()), SLOT(importFromFile()));
 }
 
 FrontView::~FrontView() {
@@ -123,5 +146,67 @@ void FrontView::keyPressEvent(QKeyEvent *event) {
             }
             ui->listView->selectionModel()->clear();
         }
+    }
+}
+
+void FrontView::saveToFile() {
+    auto filename = QFileDialog::getSaveFileName(this, "Save To...",
+        "/Users/Dmitry/Desktop", "Text File (*.txt)");
+
+    QFile file(filename);
+    file.open(QIODevice::WriteOnly | QIODevice::Text);
+
+    QTextStream out(&file);
+    std::stringstream ss;
+
+    for (auto matrix : listModel->getData()) {
+        ss << matrix->toStr() << ":" << *matrix << "\n" << std::endl;
+        out << QString::fromStdString(ss.str());
+    }
+    file.close();
+}
+
+void FrontView::importFromFile() {
+    auto filename = QFileDialog::getOpenFileName(this, "Import From...",
+        "/Users/Dmitry/Desktop", "Text File (*.txt)");
+    QFile inputFile(filename);
+    if (inputFile.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+       auto indexEnd = listModel->index(listModel->getData().size()-1, 0);
+       listModel->getData().clear();
+       auto indexBegin = listModel->index(0, 0);
+       emit listModel->dataChanged(indexBegin, indexEnd);
+       updateTotalLabel();
+
+       QTextStream in(&inputFile);
+       while (!in.atEnd())
+       {
+          QString line = in.readLine().toLower();
+          QRegularExpression re("([a-zA-Z\\s]+)(\\d+)x(\\d+)");
+          QRegularExpressionMatch match = re.match(line);
+          if (match.hasMatch()) {
+              size_t rows = match.captured(2).toUInt();
+              size_t columns = match.captured(3).toUInt();
+
+              if (match.captured(1) == "matrix ") {
+                  std::shared_ptr<Matrix<int>> tmpMatrix(new Matrix<int>(rows, columns));
+                  for (size_t i = 0; i < rows; ++i) {
+                      for (size_t j = 0; j < columns; ++j) {
+                         in >> (*tmpMatrix)(i,j);
+                      }
+                  }
+                  addMatrix(Position::Bottom, tmpMatrix);
+              } else if (match.captured(1) == "matrix extended ") {
+                  std::shared_ptr<Matrix<int>> tmpMatrix(new MatrixExtended<int>(rows, columns));
+                  for (size_t i = 0; i < rows; ++i) {
+                      for (size_t j = 0; j < columns; ++j) {
+                         in >> (*tmpMatrix)(i,j);
+                      }
+                  }
+                  addMatrix(Position::Bottom, tmpMatrix);
+              }
+          }
+       }
+       inputFile.close();
     }
 }

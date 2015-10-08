@@ -24,6 +24,8 @@ private slots:
 
     void addMatrix(Position, std::shared_ptr<Matrix<int>>&);
     void removeMatrix(int);
+    void saveToFile();
+    void importFromFile();
 
 private:
     MatrixModel *listModel;
