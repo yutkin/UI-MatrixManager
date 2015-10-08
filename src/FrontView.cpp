@@ -26,7 +26,6 @@ FrontView::FrontView(QWidget *parent) :
 
     auto importFromFileAction = new QAction("Import From...", this);
     importFromFileAction->setShortcut(tr("Ctrl+O"));
-    fileMenu->addAction(importFromFileAction);
 
     auto saveToFileAction = new QAction("Save As...", this);
     saveToFileAction->setShortcut(tr("Ctrl+S"));
@@ -42,11 +41,11 @@ FrontView::FrontView(QWidget *parent) :
     connect(ui->addToTopBtn, SIGNAL(clicked()), SLOT(addToTopButtonClicked()));
     connect(ui->findBtn,     SIGNAL(clicked()), SLOT(findBtnClicked()));
 
+    connect(saveToFileAction,     SIGNAL(triggered()), SLOT(saveToFile()));
+    connect(importFromFileAction, SIGNAL(triggered()), SLOT(importFromFile()));
+
     connect(ui->listView, SIGNAL(doubleClicked(QModelIndex)),
             SLOT(matrixItemDblClicked(QModelIndex)));
-
-    connect(saveToFileAction,   SIGNAL(triggered()), SLOT(saveToFile()));
-    connect(importFromFileAction, SIGNAL(triggered()), SLOT(importFromFile()));
 }
 
 FrontView::~FrontView() {
