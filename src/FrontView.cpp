@@ -169,8 +169,7 @@ void FrontView::importFromFile() {
     auto filename = QFileDialog::getOpenFileName(this, "Import From...",
         "/Users/Dmitry/Desktop", "Text File (*.txt)");
     QFile inputFile(filename);
-    if (inputFile.open(QIODevice::ReadOnly | QIODevice::Text))
-    {
+    if (inputFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
        auto indexEnd = listModel->index(listModel->getData().size()-1, 0);
        listModel->getData().clear();
        auto indexBegin = listModel->index(0, 0);
@@ -178,8 +177,7 @@ void FrontView::importFromFile() {
        updateTotalLabel();
 
        QTextStream in(&inputFile);
-       while (!in.atEnd())
-       {
+       while (!in.atEnd()) {
           QString line = in.readLine().toLower();
           QRegularExpression re("([a-zA-Z\\s]+)(\\d+)x(\\d+)");
           QRegularExpressionMatch match = re.match(line);
